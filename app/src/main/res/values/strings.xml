@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">CardsApp</string>
+
+    <string name="progress_message">Загрузка…</string>
+
+    <string name="desc">Описание</string>
+
+    <string name="username">Username</string>
+    <string name="password">Password</string>
+
+    <string name="sign_up">Зарегистрироваться</string>
+
+    <string name="name_already_exist">Данное имя уже занято</string>
+    <string name="enter_correct_name">Введите правильный email</string>
+    <string name="enter_correct_password">Введите правильный пароль</string>
+    <string name="user_not_found">Пользователь с таким именем и паролем не найден.Введите корректные данные</string>
+
+    <string name="loading">Loading…</string>
+    <string name="change_data">Изменить данные</string>
+    <string name="photo">Фото</string>
+
+    <string name="drawer_open">Open navigation drawer</string>
+    <string name="drawer_close">Close navigation drawer</string>
+
+    <string name="text_empty_content">There are no any content yet</string>
+    <string name="email">Email</string>
+    <string name="gender">Выберите пол</string>
+
+    <string name="friends">Друзья</string>
+    <string name="tests">Тесты</string>
+    <string name="card">Карточки</string>
+    <string name="game">Игра</string>
+    <string name="logout">Выйти</string>
+
+    <string name="upload">Загрузить</string>
+    <string name="sex">Пол</string>
+    <string name="authors">Авторы</string>
+
+    <string name="test_result">Результат</string>
+
+    <string name="internet_connection_failed">No internet connection</string>
+
+
+    <string name="collapse_text_label">show less</string>
+    <string name="expand_text_label">show more</string>
+
+    <string name="duration_minutes_shortest">%1$d m</string>
+    <string name="duration_hours_shortest">%1$d h</string>
+    <string name="duration_days_shortest">%1$d d</string>
+    <string name="duration_week_shortest">%1$d w</string>
+    <string name="comments">Comments</string>
+
+    <string name="text_take_photo">Take photo</string>
+    <string name="text_pick_photo">Pick from Gallery</string>
+    <string name="button_title_cancel">Cancel</string>
+    <string name="button_ok">OK</string>
+
+    <string name="add_friend">Добавить в друзья</string>
+    <string name="remove_friend">Удалить из друзей</string>
+    <string name="remove_request">Удалить из подписок</string>
+
+    <string name="qustionId">Вопрос</string>
+    <string name="add_answer">Добавить ответ</string>
+    <string name="next_question">Следующий вопрос</string>
+    <string name="finish_questions">Завершить</string>
+    <string name="test_desc">Описание</string>
+    <string name="select_test_type">Выберите тип теста</string>
+    <string name="test_type_one">Один ответ</string>
+    <string name="test_type_many">Много ответов</string>
+
+    <string name="intelligence">Интеллект</string>
+    <string name="strength">Сила</string>
+    <string name="hp">Здоровье</string>
+    <string name="support">Поддержка</string>
+    <string name="prestige">Влияние</string>
+
+    <string name="default_parametr_value">10</string>
+    <string name="authorName">Автор теста</string>
+    <string name="test_done">Тест пройден</string>
+    <string name="test_wasnt_done">Нет</string>
+    <string name="test_was_done">Да</string>
+    <string name="do_test">Решить тест</string>
+    <string name="question_text">Вопрос</string>
+    <string name="right_asnwers">Правильных ответов</string>
+    <string name="answer">Ответ</string>
+    <string name="wrong_answers">Неправильных ответов</string>
+    <string name="winned_card">Выигранная карта</string>
+    <string name="test_failed">Тест не пройден</string>
+    <string name="set_answer">Ответить</string>
+    <string name="agree">Да</string>
+    <string name="disagree">Нет</string>
+    <string name="question_dialog_content">При выходе результат будет потерян. Выйти ?</string>
+    <string name="question_dialog_title">Вы точно хотите выйти?</string>
+    <string name="card_getted">Карта получена</string>
+
+
+
+</resources>
