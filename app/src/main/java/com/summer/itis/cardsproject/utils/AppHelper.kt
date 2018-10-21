@@ -29,6 +29,10 @@ class AppHelper {
 
     companion object {
 
+        lateinit var currentUser: User
+
+        var userInSession: Boolean = false
+
         fun setUserPhoto(photoView: ImageView, user: User, context: Context) {
             if (user.isStandartPhoto) {
                 Glide.with(context)

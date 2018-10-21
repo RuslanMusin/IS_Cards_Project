@@ -17,6 +17,7 @@ import com.summer.itis.cardsproject.ui.base.base_first.BaseBackActivity
 import com.summer.itis.cardsproject.ui.base.custom_base_menu.OnCancelListener
 import com.summer.itis.cardsproject.ui.base.custom_base_menu.OnForwardListener
 import com.summer.itis.cardsproject.ui.base.custom_base_menu.OnOkListener
+import com.summer.itis.cardsproject.utils.Const.STUB_PATH
 import com.summer.itis.cardsproject.utils.Const.gsonConverter
 import kotlinx.android.synthetic.main.back_forward_toolbar.*
 
@@ -113,8 +114,12 @@ class TestActivity : BaseBackActivity<TestPresenter>(), TestView, ChangeToolbarL
         test.questions.add(questionTwo)
 
         val card: Card = Card()
-        card.abstractCard = AbstractCard()
-        card.abstractCard.name = "Достоевский"
+        val absCard = AbstractCard()
+        absCard.name = "Достоевский"
+        absCard.description = "desc"
+        absCard.extract = "desc"
+        absCard.photoUrl = STUB_PATH
+        card.abstractCard = absCard
         test.card = card
     }
 
@@ -140,6 +145,11 @@ class TestActivity : BaseBackActivity<TestPresenter>(), TestView, ChangeToolbarL
     override fun changeToolbar(tag: String, title: String) {
         setToolbarTitle(title)
         when {
+            TEST_FRAGMENT.equals(tag) -> {
+                btn_ok.visibility = View.GONE
+                btn_cancel.visibility = View.GONE
+                btn_forward.visibility = View.GONE
+            }
 
             QUESTION_FRAGMENT.equals(tag) -> {
                 btn_back.visibility = View.GONE
@@ -152,6 +162,20 @@ class TestActivity : BaseBackActivity<TestPresenter>(), TestView, ChangeToolbarL
                 btn_cancel.visibility = View.GONE
                 btn_back.visibility = View.GONE
                 btn_forward.visibility = View.GONE
+            }
+
+            ANSWERS_FRAGMENT.equals(tag) -> {
+                btn_ok.visibility = View.GONE
+                btn_cancel.visibility = View.VISIBLE
+                btn_back.visibility = View.VISIBLE
+                btn_forward.visibility = View.VISIBLE
+            }
+
+            WINNED_FRAGMENT.equals(tag) -> {
+                btn_back.visibility = View.VISIBLE
+                btn_cancel.visibility = View.GONE
+                btn_forward.visibility = View.GONE
+                btn_ok.visibility = View.GONE
             }
         }
     }

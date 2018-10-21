@@ -94,6 +94,19 @@
     <string name="question_dialog_title">Вы точно хотите выйти?</string>
     <string name="card_getted">Карта получена</string>
 
+    <string name="login">Login</string>
+    <string name="create_account">Еще нет аккаунта ? Зарегистрируйся!</string>
+    <string name="if_member_login">Уже есть аккаунт ? Войди</string>
+    <string name="create_new_account">Зарегистрироваться</string>
 
+    <string name="add_photo">Добавить аватар</string>
+    <string name="photo_uploaded">Фото загружено</string>
+
+    <string name="choose_avatar">Выберите изображение</string>
+    <string name="choose_from_standart">Выбрать из стандартных</string>
+    <string name="choose_from_gallery">Выбрать из галлереи</string>
+
+    <string name="test_name">Название теста</string>
+    <string name="states">Состояния</string>
 
 </resources>

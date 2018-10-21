@@ -21,6 +21,8 @@ import com.summer.itis.cardsproject.ui.tests.test_item.TestActivity.Companion.AN
 import com.summer.itis.cardsproject.ui.tests.test_item.TestActivity.Companion.FINISH_FRAGMENT
 import com.summer.itis.cardsproject.ui.tests.test_item.TestActivity.Companion.TEST_JSON
 import com.summer.itis.cardsproject.ui.tests.test_item.TestActivity.Companion.WINNED_FRAGMENT
+import com.summer.itis.cardsproject.ui.tests.test_item.fragments.check_answers.AnswersFragment
+import com.summer.itis.cardsproject.ui.tests.test_item.fragments.winned_card.TestCardFragment
 
 import com.summer.itis.cardsproject.utils.AppHelper
 import com.summer.itis.cardsproject.utils.Const.gsonConverter
@@ -135,6 +137,12 @@ class FinishFragment : Fragment(), View.OnClickListener, OnBackPressedListener, 
     }
 
     private fun showWinnedCard() {
+        if(procent >= 80) {
+            val args: Bundle = Bundle()
+            args.putString(TEST_JSON, gsonConverter.toJson(test))
+            val fragment = TestCardFragment.newInstance(args)
+            (activity as BaseBackActivity<*>).changeFragment(fragment, WINNED_FRAGMENT)
+        }
     }
 
     private fun finishTest() {
@@ -148,5 +156,10 @@ class FinishFragment : Fragment(), View.OnClickListener, OnBackPressedListener, 
     }
 
     fun prepareAnswers(type: String) {
+        val args: Bundle = Bundle()
+        args.putString(ANSWERS_TYPE, type)
+        args.putString(TEST_JSON, gsonConverter.toJson(test))
+        val fragment = AnswersFragment.newInstance(args)
+        (activity as BaseBackActivity<*>).changeFragment(fragment, ANSWERS_FRAGMENT + 0)
     }
 }
