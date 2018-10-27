@@ -33,6 +33,8 @@ class AppHelper {
 
         var userInSession: Boolean = false
 
+        val dataReference: DatabaseReference = FirebaseDatabase.getInstance().reference
+
         fun setUserPhoto(photoView: ImageView, user: User, context: Context) {
             if (user.isStandartPhoto) {
                 Glide.with(context)

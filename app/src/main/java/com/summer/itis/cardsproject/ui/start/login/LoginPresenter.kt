@@ -52,6 +52,8 @@ class LoginPresenter: BasePresenter<LoginView>() {
 
     fun updateUI() {
         val user: User = User()
+        user.id = "Dm9nt1k1YxWnonZ2t3y9YUbjHUB2"
+        user.username = "Azat"
         setUserSession(user)
         viewState.goToProfile(user)
     }

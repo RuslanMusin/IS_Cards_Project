@@ -36,6 +36,20 @@
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden"
             />
+
+        <activity
+            android:name=".ui.game.play.bot_play.BotGameActivity"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"
+            />
+
+        <activity
+            android:name=".ui.member.member_item.PersonalActivity"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"
+            />
     </application>
 
 </manifest>

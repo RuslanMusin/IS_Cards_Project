@@ -12,6 +12,7 @@ import com.summer.itis.cardsproject.R
 import com.summer.itis.cardsproject.model.test.Test
 import com.summer.itis.cardsproject.model.user.User
 import com.summer.itis.cardsproject.ui.base.base_first.BaseActivity
+import com.summer.itis.cardsproject.ui.member.member_item.PersonalActivity
 import com.summer.itis.cardsproject.ui.start.registration.RegistrationActivity
 import com.summer.itis.cardsproject.ui.tests.test_item.TestActivity
 import com.summer.itis.cardsproject.utils.Const.USER_DATA_PREFERENCES
@@ -96,8 +97,8 @@ class LoginActivity : BaseActivity<LoginPresenter>(), LoginView, View.OnClickLis
     }
 
     override fun goToProfile(user: User) {
-        TestActivity.start(this, Test())
-//        PersonalActivity.start(this, user)
+//        TestActivity.start(this, Test())
+        PersonalActivity.start(this, user)
     }
 
     private fun goToRegistration() {
