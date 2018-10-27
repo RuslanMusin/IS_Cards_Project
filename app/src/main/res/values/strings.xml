@@ -109,4 +109,25 @@
     <string name="test_name">Название теста</string>
     <string name="states">Состояния</string>
 
+    <string name="now_time_range">now</string>
+
+    <string name="offline_connection">Нет сети</string>
+
+    <string name="change_two_cards">Замените 2 карты по желанию</string>
+    <string name="game_round">Round %1$d</string>
+    <string name="view_time">Просмотр карт</string>
+
+    <string name="draw">Ничья</string>
+    <string name="change_cards">Замена карт</string>
+    <string name="play_game">Сыграть в игру</string>
+
+    <string name="time">Время :</string>
+
+
+    <string name="game_ended">Игра закончена</string>
+    <string name="enemy_disconnected">Противник отключился от игры</string>
+    <string name="you_disconnected">Соединение прервано. Игра закончена</string>
+
+    <string name="enemy">enemy:</string>
+
 </resources>
