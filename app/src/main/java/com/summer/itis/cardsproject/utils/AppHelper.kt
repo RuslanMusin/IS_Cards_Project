@@ -33,6 +33,12 @@ class AppHelper {
 
         var userInSession: Boolean = false
 
+        var userStatus: String = OFFLINE_STATUS
+
+        var onlineFunction: (() -> Unit)? = null
+
+        var offlineFunction: (() -> Unit)? = null
+
         val dataReference: DatabaseReference = FirebaseDatabase.getInstance().reference
 
         fun setUserPhoto(photoView: ImageView, user: User, context: Context) {

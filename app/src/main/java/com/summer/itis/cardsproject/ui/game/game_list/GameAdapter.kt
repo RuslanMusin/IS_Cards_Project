@@ -1,0 +1,63 @@
+package com.summer.itis.cardsproject.ui.game.game_list
+
+import android.view.View
+import android.view.ViewGroup
+import com.afollestad.materialdialogs.DialogAction
+import com.afollestad.materialdialogs.MaterialDialog
+import com.summer.itis.cardsproject.R
+import com.summer.itis.cardsproject.model.game.Lobby
+import com.summer.itis.cardsproject.repository.RepositoryProvider.Companion.gamesRepository
+import com.summer.itis.cardsproject.ui.base.base_first.BaseAdapter
+import com.summer.itis.cardsproject.ui.game.game_list.GameItemHolder
+import kotlinx.android.synthetic.main.item_game.view.*
+
+class GameAdapter(items: MutableList<Lobby>) : BaseAdapter<Lobby, GameItemHolder>(items) {
+
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): GameItemHolder {
+        return GameItemHolder.create(parent)
+    }
+
+    override fun onBindViewHolder(holder: GameItemHolder, position: Int) {
+        super.onBindViewHolder(holder, position)
+        val item = getItem(position)
+        holder.bind(item)
+
+        if(item.isMyCreation) {
+            holder.itemView.btn_delete.visibility = View.VISIBLE
+
+            holder.itemView.btn_delete.setOnClickListener{
+                MaterialDialog.Builder(holder.itemView.context)
+                        .title(R.string.delete_game)
+                        .content(R.string.game_will_be_deleted)
+                        .positiveText(R.string.delete)
+                        .onPositive(object :MaterialDialog.SingleButtonCallback {
+                            override fun onClick(dialog: MaterialDialog, which: DialogAction) {
+                                removeItem(item)
+                            }
+
+                        })
+                        .negativeText(R.string.cancel)
+                        .onNegative{ dialog, action -> dialog.cancel()}
+                        .show()
+            }
+        }
+
+    }
+
+    fun removeItemById(id: String?) {
+        id?.let {
+            for(item in items) {
+                if(item.id.equals(it)) {
+                    removeItem(item)
+                }
+            }
+        }
+    }
+
+    private fun removeItem(item: Lobby) {
+        val pos = items.indexOf(item)
+        gamesRepository.removeLobby(item.id)
+        items.removeAt(pos)
+        notifyItemRemoved(pos)
+    }
+}

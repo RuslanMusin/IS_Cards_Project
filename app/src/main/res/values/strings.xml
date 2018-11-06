@@ -69,11 +69,11 @@
     <string name="test_type_one">Один ответ</string>
     <string name="test_type_many">Много ответов</string>
 
-    <string name="intelligence">Интеллект</string>
-    <string name="strength">Сила</string>
-    <string name="hp">Здоровье</string>
-    <string name="support">Поддержка</string>
-    <string name="prestige">Влияние</string>
+    <string name="intelligence">Наука</string>
+    <string name="strength">Война</string>
+    <string name="hp">Культура</string>
+    <string name="support">Религия</string>
+    <string name="prestige">Политика</string>
 
     <string name="default_parametr_value">10</string>
     <string name="authorName">Автор теста</string>
@@ -129,5 +129,47 @@
     <string name="you_disconnected">Соединение прервано. Игра закончена</string>
 
     <string name="enemy">enemy:</string>
+    <string name="wait_enemy">Ожидание противника</string>
+    <string name="enemy_not_online">Игрок не в сети</string>
+
+    <string name="game_request_dialog_title">Предложение сыграть</string>
+    <string name="game_request_dialog_content">Вы хотите сыграть с игроком ?</string>
+
+    <string name="enemy_doesnt_have_card_min">У противника недостаточно карт для этой игры</string>
+    <string name="you_dont_have_card_min">Вам не хватает карт для игры</string>
+    <string name="you_cant_play_with_youself">Вы не можете присоединиться к созданной вами игре</string>
+
+    <string name="find_bot">Найти бота</string>
+    <string name="search">Search</string>
+
+    <string name="games">Игры</string>
+    <string name="add_game">Новая игра</string>
+    <string name="game_name">Название игры</string>
+    <string name="game_card_count">Кол-во возможных карт</string>
+    <string name="add_another_photo">Выбрать другой аватар</string>
+    <string name="create_game">Создать игру</string>
+    <string name="select_game_type">Выберите тип игры</string>
+
+    <string name="official_type">Только оффициальные карты</string>
+    <string name="user_type">Все карты</string>
+
+    <string name="default_card_number">5</string>
+    <string name="card_number">Кол-во карт: %1$d</string>
+
+    <string name="game_will_be_deleted">Удалить эту игру ?</string>
+    <string name="delete_game">Удаление игры</string>
+
+    <string name="delete">Удалить</string>
+    <string name="cancel">Отмена</string>
+
+    <string name="old_game_will_be_deleted">Старая игра будет удалена</string>
+    <string name="create_new_game">Создание новой игры</string>
+
+    <string name="choose_card_mode">Какие карты можно использовать</string>
+
+    <string name="new_game">Новая игра</string>
+    <string name="select_avatar">Выберите изображение</string>
+
+    <string name="set_card_min">В игре должно быть минимум 5 карт</string>
 
 </resources>

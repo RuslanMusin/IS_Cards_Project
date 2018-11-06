@@ -17,6 +17,7 @@ import com.summer.itis.cardsproject.ui.base.base_first.BaseBackActivity
 import com.summer.itis.cardsproject.ui.base.custom_base_menu.OnCancelListener
 import com.summer.itis.cardsproject.ui.base.custom_base_menu.OnForwardListener
 import com.summer.itis.cardsproject.ui.base.custom_base_menu.OnOkListener
+import com.summer.itis.cardsproject.utils.Const.EDIT_STATUS
 import com.summer.itis.cardsproject.utils.Const.STUB_PATH
 import com.summer.itis.cardsproject.utils.Const.gsonConverter
 import kotlinx.android.synthetic.main.back_forward_toolbar.*
@@ -49,6 +50,10 @@ class TestActivity : BaseBackActivity<TestPresenter>(), TestView, ChangeToolbarL
             intent.putExtra(TEST_JSON,testStr)
             activity.startActivity(intent)
         }
+    }
+
+    override fun setStartStatus() {
+        setStatus(EDIT_STATUS)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

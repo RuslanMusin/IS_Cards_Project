@@ -45,6 +45,10 @@ class RegistrationActivity : BaseActivity<RegistrationPresenter>(), Registration
         setListeners()
     }
 
+    override fun setStartStatus() {
+
+    }
+
     private fun setListeners() {
         btn_sign_up.setOnClickListener(this)
         li_add_photo.setOnClickListener(this)

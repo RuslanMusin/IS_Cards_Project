@@ -131,4 +131,122 @@ class CardRepository: RelationalRepository<Card>() {
         }
         return single.compose(RxUtils.asyncSingle())
     }
+
+    fun addCardAfterGame(cardId: String , winnerId: String, loserId: String): Single<Boolean> {
+        val single: Single<Boolean> = Single.create { e ->
+            val childUpdates = HashMap<String, Any?>()
+            findFullCard(cardId)
+                    .subscribe { card ->
+                        card.test.id.let {
+                            testRepository.changeStatus(it, winnerId, WIN_GAME).subscribe { relationWinner ->
+                                updateWinnner(relationWinner, card, childUpdates)
+                                testRepository.changeStatus(it, loserId, LOSE_GAME).subscribe { relationLoser ->
+                                    updateLoser(relationLoser, card, childUpdates)
+                                    updateGameCards(card, relationWinner, relationLoser, childUpdates).subscribe{ after ->
+                                        databaseReference.root.updateChildren(childUpdates)
+                                        e.onSuccess(true)
+                                    }
+
+                                }
+                            }
+                        }
+                    }
+        }
+        return single.compose(RxUtils.asyncSingle())
+    }
+
+    private fun updateWinnner(relationWinner: Relation, card: Card, childUpdates: HashMap<String, Any?>) {
+        if (LOSE_GAME.equals(relationWinner.relBefore) || BEFORE_TEST.equals(relationWinner.relBefore)) {
+            val relation = Relation()
+            relation.id = card.test.id
+            if (LOSE_GAME.equals(relationWinner.relBefore)) {
+                relation.relation = AFTER_TEST
+            }
+            if (BEFORE_TEST.equals(relationWinner.relBefore)) {
+                relation.relation = WIN_GAME
+            }
+            val addCardValues = setIdRelation(card.id)
+            val addTestValues = setFullRelation(relation)
+            childUpdates[USERS_CARDS + Const.SEP + relationWinner.id + SEP + card.id] = addCardValues
+            childUpdates[USERS_TESTS + Const.SEP + relationWinner.id + SEP + card.test.id] = addTestValues
+        }
+    }
+
+    private fun updateLoser(relationLoser: Relation, card: Card, childUpdates: HashMap<String, Any?>) {
+        if (WIN_GAME.equals(relationLoser.relBefore) || AFTER_TEST.equals(relationLoser.relBefore)) {
+            var relation: Relation? = Relation()
+            relation?.id = card.test.id
+            if (WIN_GAME.equals(relationLoser.relBefore)) {
+                relation = null
+            }
+            if (AFTER_TEST.equals(relationLoser.relBefore)) {
+                relation?.relation = LOSE_GAME
+            }
+            val addCardValues = setIdRelation(card.id)
+            val addTestValues = setFullRelation(relation)
+            childUpdates[USERS_CARDS + Const.SEP + relationLoser.id + SEP + card.id] = addCardValues
+            childUpdates[USERS_TESTS + Const.SEP + relationLoser.id + SEP + card.test.id] = addTestValues
+        }
+    }
+
+    private fun updateGameCards(card: Card, relationWinner: Relation, relationLoser: Relation, childUpdates: HashMap<String, Any?>): Single<Boolean> {
+        val single: Single<Boolean> = Single.create { e ->
+            card.absCardId.let {
+                if (LOSE_GAME.equals(relationWinner.relBefore) || BEFORE_TEST.equals(relationWinner.relBefore)) {
+                    updateWinnerCard(it, relationWinner.id, childUpdates).subscribe { winnerCardUpdated ->
+                        updateLoserCard(it, relationLoser.id, childUpdates).subscribe { loserCardUpdated ->
+                            e.onSuccess(true)
+                        }
+                    }
+
+                }
+
+            }
+        }
+        return single.compose(RxUtils.asyncSingle())
+    }
+
+    private fun updateWinnerCard(it: String, id: String, childUpdates: HashMap<String, Any?>): Single<Boolean> {
+        val single: Single<Boolean> = Single.create { e ->
+            findMyAbstractCardStates(it, id)
+                    .subscribe { winnerCards ->
+                        if (winnerCards.size == 0) {
+                            val addAbstractCardValues = abstractCardRepository.setIdRelation(it)
+                            childUpdates[USERS_ABSTRACT_CARDS + Const.SEP + id + SEP + it] = addAbstractCardValues
+                        }
+                        e.onSuccess(true)
+                    }
+        }
+        return single.compose(RxUtils.asyncSingle())
+    }
+
+    private fun updateLoserCard(it: String, id: String, childUpdates: HashMap<String, Any?>): Single<Boolean> {
+        val single: Single<Boolean> = Single.create { e ->
+            findMyAbstractCardStates(it, id)
+                    .subscribe { loserCards ->
+                        if (loserCards.size == 1) {
+                            childUpdates[USERS_ABSTRACT_CARDS + Const.SEP + id + SEP + it] = null
+                        }
+                        e.onSuccess(true)
+                    }
+        }
+        return single.compose(RxUtils.asyncSingle())
+    }
+
+    fun findMyAbstractCardStates(abstractCardId: String, userId: String): Single<List<Card>> {
+        val single: Single<List<Card>> = Single.create { e ->
+            findRelativeIds(userId, USERS_CARDS).subscribe { ids ->
+                findEntityByFieldValue(FIELD_CARD_ID, abstractCardId).subscribe { cards ->
+                    val list: MutableList<Card> = ArrayList()
+                    for (card in cards) {
+                        if (ids.contains(card.id)) {
+                            list.add(card)
+                        }
+                    }
+                    e.onSuccess(cards)
+                }
+            }
+        }
+        return single.compose(RxUtils.asyncSingle())
+    }
 }

@@ -23,7 +23,7 @@ import java.util.*
 
 @InjectViewState
 class BotGamePresenter() : BasePresenter<BotGameView>(), GamesRepository.InGameCallbacks {
-    
+
     lateinit var botCards: MutableList<Card>
     lateinit var myCards: MutableList<Card>
     lateinit var lobby: Lobby
@@ -41,7 +41,6 @@ class BotGamePresenter() : BasePresenter<BotGameView>(), GamesRepository.InGameC
     private fun setStartCards() {
         val single: Single<List<Card>> = cardRepository.findCardsByType(AppHelper.currentUser.id,lobby.type, true)
         single.subscribe { cards: List<Card>? ->
-            Log.d(TAG_LOG, "cards finded")
             cards?.let {
                 val mutCards = cards.toMutableList()
                 val myCards: MutableList<Card> = ArrayList()
@@ -53,7 +52,11 @@ class BotGamePresenter() : BasePresenter<BotGameView>(), GamesRepository.InGameC
                         mutCards.remove(it)
                     }
                 }
-                setCardList(myCards)
+                if (cards.size > lobby.cardNumber) {
+                    viewState.changeCards(myCards,mutCards)
+                } else {
+                    setCardList(myCards)
+                }
             }
         }
     }
@@ -244,8 +247,17 @@ class BotGamePresenter() : BasePresenter<BotGameView>(), GamesRepository.InGameC
         lobby.gameData?.onYouLoseCard?.let { onGameEnd(GamesRepository.GameEndType.YOU_LOSE, it)}
     }
 
+    fun onDisconnectAndLose() {
+        lobby.gameData?.onYouLoseCard?.let { onGameEnd(GamesRepository.GameEndType.YOU_DISCONNECTED_AND_LOSE, it) }
+    }
+
     fun startGame() {
         setLoseCards()
+
+        userRepository.checkUserConnection {
+            Log.d(TAG_LOG,"disconnect bot and me")
+            onDisconnectAndLose()
+        }
     }
 
     private fun setLoseCards() {

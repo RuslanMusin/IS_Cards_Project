@@ -21,6 +21,7 @@ import com.summer.itis.cardsproject.repository.database.game.GamesRepository.Com
 import com.summer.itis.cardsproject.repository.database.user.UserRepository
 import com.summer.itis.cardsproject.ui.base.base_first.BaseActivity
 import com.summer.itis.cardsproject.ui.base.base_first.BasePresenter
+import com.summer.itis.cardsproject.ui.game.game_list.game.GameListActivity
 import com.summer.itis.cardsproject.ui.game.play.bot_play.BotGameActivity
 import com.summer.itis.cardsproject.ui.start.login.LoginActivity
 import com.summer.itis.cardsproject.ui.tests.test_item.TestActivity
@@ -118,18 +119,17 @@ abstract class NavigationBaseActivity<Presenter: BasePresenter<*>> : BaseActivit
     private fun showCards() {}
 
     private fun showFriends() {
-
     }
 
     private fun showGame() {
-        playWithBot(prepareBotData())
+        GameListActivity.start(this)
     }
 
     private fun showTests() {
         TestActivity.start(this, Test())
     }
 
-    private fun prepareBotData(): Lobby {
+   /* private fun prepareBotData(): Lobby {
         val lobby: Lobby = Lobby()
 
         val playerData = LobbyPlayerData()
@@ -166,5 +166,5 @@ abstract class NavigationBaseActivity<Presenter: BasePresenter<*>> : BaseActivit
                 BotGameActivity.start(this)
             }
         }
-    }
+    }*/
 }

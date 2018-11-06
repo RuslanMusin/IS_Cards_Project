@@ -1,4 +1,4 @@
-package com.summer.itis.cardsproject.ui.game.play.bot_play
+package com.summer.itis.cardsproject.ui.game.play.user_play
 
 import com.summer.itis.cardsproject.model.card.Card
 import com.summer.itis.cardsproject.model.test.Question
@@ -6,7 +6,8 @@ import com.summer.itis.cardsproject.model.user.User
 import com.summer.itis.cardsproject.repository.database.game.GamesRepository
 import com.summer.itis.cardsproject.ui.game.play.PlayView
 
-interface BotGameView : PlayView {
+
+interface PlayGameView : PlayView {
 
     fun setEnemyUserData(user: User)
 
@@ -29,4 +30,6 @@ interface BotGameView : PlayView {
     fun showYourAnswer(correct: Boolean)
 
     fun showGameEnd(type: GamesRepository.GameEndType, card: Card)
+
+    fun waitEnemyTimer(time: Long)
 }

@@ -14,6 +14,10 @@ object Const {
     const val BOT_GAME = "bot_game"
 
     const val BOT_ID = "6n5OesjRMGN0jFAhP5jG9hxtaRg2"
+    const val USER_ID = "user_id"
+
+    const val ADD_CARD: Int = 1
+    const val ITEM_JSON = "item_json"
 
 
     //game modes/stadies
@@ -22,6 +26,10 @@ object Const {
     const val MODE_CARD_VIEW = "card_view"
     const val MODE_END_GAME = "end_game"
 
+    //Test list types
+    const val OFFICIAL_LIST = "OFFICIAL"
+    const val USER_LIST = "USER"
+    const val MY_LIST = "MY"
 
     //Gamer status
     const val ONLINE_STATUS = "online_status"

@@ -1,10 +1,12 @@
-package com.summer.itis.cardsproject.ui.game.play.bot_play
+package com.summer.itis.cardsproject.ui.game.play.user_play
 
+import GameQuestionFragment
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.os.CountDownTimer
 import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.View
 import android.view.animation.AlphaAnimation
@@ -18,33 +20,36 @@ import com.arellomobile.mvp.presenter.InjectPresenter
 import com.bumptech.glide.Glide
 import com.ms.square.android.expandabletextview.ExpandableTextView
 import com.summer.itis.cardsproject.R
-import com.summer.itis.cardsproject.R.id.tv_game_enemy_name
 import com.summer.itis.cardsproject.model.card.Card
 import com.summer.itis.cardsproject.model.test.Question
 import com.summer.itis.cardsproject.model.user.User
+import com.summer.itis.cardsproject.repository.RepositoryProvider.Companion.gamesRepository
 import com.summer.itis.cardsproject.repository.database.game.GamesRepository
-import com.summer.itis.cardsproject.ui.base.base_first.BaseActivity
-import com.summer.itis.cardsproject.ui.game.game_list.game.GameListActivity
+import com.summer.itis.cardsproject.ui.base.base_first.BaseBackActivity
 import com.summer.itis.cardsproject.ui.game.play.change_list.GameChangeListAdapter
 import com.summer.itis.cardsproject.ui.game.play.list.GameCardsListAdapter
 import com.summer.itis.cardsproject.ui.member.member_item.PersonalActivity
 import com.summer.itis.cardsproject.utils.AppHelper
-import com.summer.itis.cardsproject.utils.Const
+import com.summer.itis.cardsproject.utils.Const.IN_GAME_STATUS
+import com.summer.itis.cardsproject.utils.Const.MODE_CARD_VIEW
+import com.summer.itis.cardsproject.utils.Const.TAG_LOG
 import com.summer.itis.cardsproject.utils.getRandom
 import com.summer.itis.cardsproject.widget.CenterZoomLayoutManager
 import kotlinx.android.synthetic.main.activity_game.*
 import kotlinx.android.synthetic.main.dialog_end_game.view.*
 import kotlinx.android.synthetic.main.game_toolbar.*
+import kotlinx.android.synthetic.main.game_toolbar.view.*
 import kotlinx.android.synthetic.main.item_game_card_medium.view.*
 import kotlinx.android.synthetic.main.layout_change_card.*
 import java.util.*
 
-class BotGameActivity : BaseActivity<BotGamePresenter>(), BotGameView {
+
+class PlayGameActivity : BaseBackActivity<PlayGamePresenter>(), PlayGameView {
 
     var mode: String = MODE_PLAY_GAME
 
     @InjectPresenter
-    override lateinit var presenter: BotGamePresenter
+    override lateinit var presenter: PlayGamePresenter
 
     lateinit var myCard: Card
     lateinit var enemyCard: Card
@@ -62,23 +67,28 @@ class BotGameActivity : BaseActivity<BotGamePresenter>(), BotGameView {
     var round: Int = 1
 
     lateinit var timer: CountDownTimer
+    var disconnectTimer: CountDownTimer? = null
+
+    lateinit var toolbar: Toolbar
 
     lateinit var adapter: GameCardsListAdapter
 
     companion object {
+
+        const val MAX_LENGTH = 30
 
         const val MODE_CHANGE_CARDS = "change_cards"
         const val MODE_PLAY_GAME = "play_game"
         const val GAME_MODE = "game_mode"
 
         fun start(context: Context, gameMode: String) {
-            val intent = Intent(context, BotGameActivity::class.java)
+            val intent = Intent(context, PlayGameActivity::class.java)
             intent.putExtra(GAME_MODE,gameMode)
             context.startActivity(intent)
         }
 
         fun start(context: Context) {
-            val intent = Intent(context, BotGameActivity::class.java)
+            val intent = Intent(context, PlayGameActivity::class.java)
             context.startActivity(intent)
         }
 
@@ -91,49 +101,116 @@ class BotGameActivity : BaseActivity<BotGamePresenter>(), BotGameView {
     }
 
     override fun setStartStatus() {
-        setStatus(Const.IN_GAME_STATUS)
+        setStatus(IN_GAME_STATUS)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.layout_change_card)
-        setBotGameData()
+        setToolbarData()
+        setCardChangeListeners()
+        setChangeRecycler()
     }
-
-    private fun setBotGameData() {
-        rv_game_start_cards.layoutManager = CenterZoomLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
-        AppHelper.currentUser.gameLobby?.let { presenter.setInitState(it) }
+    
+    private fun setToolbarData() {
+        setSupportActionBar(game_toolbar)
+    }
+    
+    private fun setCardChangeListeners() {
+        btn_cancel.setOnClickListener{quitGameBeforeGameStart()}
+    }
+    
+    private fun setChangeRecycler() {
+        rv_game_start_cards.layoutManager = CenterZoomLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
+        AppHelper.currentUser.gameLobby?.let {
+            presenter.setInitState(it)
+        }
     }
 
     override fun onBackPressed() {
         if(mode.equals(MODE_CHANGE_CARDS)) {
             mode = MODE_PLAY_GAME
-            stopChange()()
+            stopChange(20000)()
         } else {
-            quitGame()
+           quitGame()
         }
     }
 
-    fun quitGame() {
+    fun quitGameBeforeGameStart() {
+        Log.d(TAG_LOG,"quit game before game start")
         MaterialDialog.Builder(this)
                 .title(R.string.question_dialog_title)
                 .content(R.string.question_dialog_content)
                 .positiveText(R.string.agree)
                 .negativeText(R.string.disagree)
-                .onPositive(object : MaterialDialog.SingleButtonCallback {
+                .onPositive(object :MaterialDialog.SingleButtonCallback {
                     override fun onClick(dialog: MaterialDialog, which: DialogAction) {
-                        presenter.onDisconnectAndLose()
+                        timer.cancel()
+                        gamesRepository.disconnectMe().subscribe{ e ->
+                            goToFindGameActivity()
+                        }
                     }
 
                 })
                 .show()
     }
 
-    fun stopChange(): () -> Unit {
+    fun quitGame() {
+        Log.d(TAG_LOG,"quit game")
+        MaterialDialog.Builder(this)
+                .title(R.string.question_dialog_title)
+                .content(R.string.question_dialog_content)
+                .positiveText(R.string.agree)
+                .negativeText(R.string.disagree)
+                .onPositive(object :MaterialDialog.SingleButtonCallback {
+                    override fun onClick(dialog: MaterialDialog, which: DialogAction) {
+                        timer.cancel()
+                        disconnectTimer?.cancel()
+                        gamesRepository.disconnectMe().subscribe()
+                    }
+                })
+                .show()
+    }
+
+    fun stopChange(time: Long): () -> Unit {
         return {
             timer.cancel()
-            presenter.setCardList((rv_game_start_cards.adapter as GameChangeListAdapter).items as ArrayList<Card>)
+            presenter.changeGameMode(MODE_PLAY_GAME)
+            presenter.setCardList((rv_game_start_cards.adapter as GameChangeListAdapter).items as ArrayList<Card>, time)
         }
+    }
+
+    override fun waitEnemyTimer(time: Long) {
+        toolbar.tv_time_title.text = getString(R.string.wait_enemy)
+        timer = object : CountDownTimer(time, 1000) {
+
+            override fun onTick(millisUntilFinished: Long) {
+                toolbar.tv_time.text =  "${millisUntilFinished / 1000}"
+                Log.d(TAG_LOG,"Wait Change Time = ${millisUntilFinished / 1000}")
+            }
+
+            override fun onFinish() {
+                Log.d(TAG_LOG,"stop change cards")
+                enemyDisconnectedBeforeGame()
+            }
+        }.start()
+    }
+
+    fun enemyDisconnectedBeforeGame() {
+        MaterialDialog.Builder(this)
+                .title(R.string.game_ended)
+                .content(R.string.enemy_disconnected)
+                .positiveText("OK")
+                .onPositive(object :MaterialDialog.SingleButtonCallback {
+                    override fun onClick(dialog: MaterialDialog, which: DialogAction) {
+                        timer.cancel()
+                        gamesRepository.disconnectMe().subscribe{ e ->
+                            goToFindGameActivity()
+                        }
+                    }
+
+                })
+                .show()
     }
 
     override fun setEnemyUserData(user: User) {
@@ -141,50 +218,50 @@ class BotGameActivity : BaseActivity<BotGamePresenter>(), BotGameView {
     }
 
     override fun changeCards(cards: MutableList<Card>, mutCards: MutableList<Card>) {
-        Log.d(Const.TAG_LOG,"changeCards")
+        Log.d(TAG_LOG,"changeCards")
         mode = MODE_CHANGE_CARDS
-        val adapter = GameChangeListAdapter(cards, mutCards, mutCards.size, stopChange())
-        adapter.attachToRecyclerView(rv_game_start_cards)
-        setChangeCardsTimer()
-    }
+        rv_game_start_cards.adapter = GameChangeListAdapter(cards, mutCards, mutCards.size, stopChange(15000))
 
-    private fun setChangeCardsTimer() {
+        toolbar.tv_time_title.text = getString(R.string.change_cards)
         timer = object : CountDownTimer(10000, 1000) {
 
             override fun onTick(millisUntilFinished: Long) {
+                toolbar.tv_time.text =  "${millisUntilFinished / 1000}"
+                Log.d(TAG_LOG,"Card Change Time = ${millisUntilFinished / 1000}")
             }
 
             override fun onFinish() {
-                Log.d(Const.TAG_LOG,"stop change cards")
-                stopChange()()
+                Log.d(TAG_LOG,"stop change cards")
+               stopChange(10000)()
             }
         }.start()
     }
+    
+    private fun changeRound(round: Int) {
+        toolbar_title.text = getString(R.string.game_round,round)
+    }
 
     override fun setCardsList(cards: ArrayList<Card>) {
+        timer.cancel()
         myCards = cards
-        Log.d(Const.TAG_LOG,"set cards")
+        Log.d(TAG_LOG,"set cards")
         setContentView(R.layout.activity_game)
         setStartCardInvisible()
         initRecycler(cards)
-        setToolbarData()
-        startTimer()
         setListeners()
+        setSupportActionBar(game_toolbar)
+        changeRound(round)
+        startTimer()
     }
-
+    
     private fun setStartCardInvisible() {
         enemy_selected_card.visibility = View.INVISIBLE
         my_selected_card.visibility = View.INVISIBLE
         game_questions_container.visibility = View.GONE
     }
-
-    private fun setToolbarData() {
-        setSupportActionBar(game_toolbar)
-        changeRound(round)
-    }
-
+    
     private fun initRecycler(cards: ArrayList<Card>) {
-        Log.d(Const.TAG_LOG,"set game adapter")
+        Log.d(TAG_LOG,"set game adapter")
         rv_game_my_cards.adapter = GameCardsListAdapter(
                 cards,
                 this,
@@ -195,9 +272,9 @@ class BotGameActivity : BaseActivity<BotGamePresenter>(), BotGameView {
                 }
         )
         adapter = rv_game_my_cards.adapter as GameCardsListAdapter
-        rv_game_my_cards.layoutManager = CenterZoomLayoutManager(this, LinearLayoutManager.HORIZONTAL,false)
+        rv_game_my_cards.layoutManager = CenterZoomLayoutManager(this,LinearLayoutManager.HORIZONTAL,false)
     }
-
+    
     private fun setListeners() {
         val listener: View.OnClickListener = View.OnClickListener {
 
@@ -217,9 +294,9 @@ class BotGameActivity : BaseActivity<BotGamePresenter>(), BotGameView {
             }
 
         }
+        btn_cancel.setOnClickListener{quitGame()}
         enemy_selected_card.setOnClickListener(listener)
         my_selected_card.setOnClickListener(listener)
-        btn_cancel.setOnClickListener{quitGame()}
     }
 
     private fun showDialogCard(card: Card) {
@@ -267,89 +344,134 @@ class BotGameActivity : BaseActivity<BotGamePresenter>(), BotGameView {
         enemy_selected_card.startAnimation(a_anim)
     }
 
-    private fun changeRound(round: Int) {
-        toolbar_title.text = getString(R.string.game_round,round)
-    }
-
     private fun updateTime() {
-        Log.d(Const.TAG_LOG,"updateTime")
-        checkIsAnsweredBoth()
-        checkIsChoosedBoth()
+        Log.d(TAG_LOG,"updateTime")
+        checkIfAnsweredBoth()
+        checkIfChoosedBot()
     }
-
-    private fun checkIsAnsweredBoth() {
+    
+    private fun checkIfAnsweredBoth() {
         if(enemyAnswered and myAnswered) {
-            Log.d(Const.TAG_LOG,"choose card mode")
+            Log.d(TAG_LOG,"choose card mode")
             enemyAnswered = false
             myAnswered = false
             isQuestionMode = false
-            adapter.isClickable = true
             changeRound(++round)
+            disconnectTimer?.cancel()
             timer.cancel()
             startTimer()
+            adapter.isClickable = true
         }
     }
-
-    private fun checkIsChoosedBoth() {
+    
+    private fun checkIfChoosedBot() {
         if(enemyChoosed and myChoosed) {
-            Log.d(Const.TAG_LOG,"show question mode")
+            Log.d(TAG_LOG, "show question mode")
             enemyChoosed = false
             myChoosed = false
             isQuestionMode = true
-            startViewTime()
+            disconnectTimer?.cancel()
+            timer.cancel()
+            presenter.changeGameMode(MODE_CARD_VIEW)
+            presenter.waitEnemyGameMode(MODE_CARD_VIEW).subscribe { e ->
+                setViewTimer()
+            }
         }
     }
-
-    private fun startViewTime() {
-        timer.cancel()
-        tv_time.text = getString(R.string.view_time)
+    
+    private fun setViewTimer() {
+        tv_time_title.text = getString(R.string.view_time)
         timer = object : CountDownTimer(10000, 1000) {
 
             override fun onTick(millisUntilFinished: Long) {
+                tv_time.text = "${millisUntilFinished / 1000}"
+                Log.d(TAG_LOG, "View Time = ${millisUntilFinished / 1000}")
             }
 
             override fun onFinish() {
-                timer.cancel()
-                presenter.showQuestion()
-                startTimer()
+                presenter.changeGameMode(MODE_PLAY_GAME)
+                presenter.waitEnemyGameMode(MODE_PLAY_GAME).subscribe { e ->
+                    presenter.showQuestion()
+                    startTimer()
+                }
             }
         }.start()
     }
 
     private fun startTimer() {
+        disconnectTimer?.cancel()
+        timer.cancel()
+        tv_time_title.text = getString(R.string.time)
         timer = object : CountDownTimer(30000, 1000) {
 
             override fun onTick(millisUntilFinished: Long) {
                 tv_time.text =  "${millisUntilFinished / 1000}"
+                Log.d(TAG_LOG,"Card/Answer time = ${millisUntilFinished / 1000}")
             }
 
             override fun onFinish() {
-                Log.d(Const.TAG_LOG,"onFinish")
-                answerIfNoAnswer()
-                chooseIfNoChoice()
+                Log.d(TAG_LOG, "onFinish")
+                if (isQuestionMode) {
+                    if (!enemyAnswered) {
+                        Log.d(TAG_LOG, "Disconnect Answer Time")
+                        tv_time_title.text = getString(R.string.wait_enemy)
+                        disconnectTimer = object : CountDownTimer(10000, 1000) {
+
+                            override fun onTick(millisUntilFinished: Long) {
+                                tv_time.text = "${millisUntilFinished / 1000}"
+                                Log.d(TAG_LOG, "Disconnect Answer Time = ${millisUntilFinished / 1000}")
+                            }
+
+                            override fun onFinish() {
+                                if (!enemyAnswered) {
+                                    Log.d(TAG_LOG, "enemy not asnwered dis")
+                                    presenter.enemyDisconnected()
+                                } else {
+                                    Log.d(TAG_LOG, "enemy answered successfully")
+                                }
+                            }
+                        }
+                        disconnectTimer?.start()
+                    }
+                    if (!myAnswered) {
+                        Log.d(TAG_LOG, "notAnswered")
+                        myAnswered = true
+                        onAnswer(false)
+                        updateTime()
+
+                    }
+                } else {
+                    if (!enemyChoosed) {
+                        tv_time_title.text = getString(R.string.wait_enemy)
+                        disconnectTimer = object : CountDownTimer(10000, 1000) {
+
+                            override fun onTick(millisUntilFinished: Long) {
+                                tv_time.text = "${millisUntilFinished / 1000}"
+                                Log.d(TAG_LOG, "Disconnect Choose Time = ${millisUntilFinished / 1000}")
+                            }
+
+                            override fun onFinish() {
+                                if (!enemyChoosed) {
+                                    Log.d(TAG_LOG, "enemy not choosed dis")
+                                    presenter.enemyDisconnected()
+                                } else {
+                                    Log.d(TAG_LOG, "enemy choosed successfully")
+                                }
+                            }
+                        }
+                        disconnectTimer?.start()
+                    }
+                    if (!myChoosed) {
+                        Log.d(TAG_LOG, "notChoosed")
+                        myChoosed = true
+                        val card: Card? = myCards.getRandom()
+                        card?.let { adapter.removeElement(it) }
+                        updateTime()
+                    }
+                }
             }
         }
         timer.start()
-    }
-
-    private fun answerIfNoAnswer() {
-        if(isQuestionMode && !myAnswered) {
-            Log.d(Const.TAG_LOG,"notAnswered")
-            myAnswered = true
-            onAnswer(false)
-            updateTime()
-
-        }
-    }
-
-    private fun chooseIfNoChoice() {
-        if(!isQuestionMode && !myChoosed) {
-            Log.d(Const.TAG_LOG,"notChoosed")
-            myChoosed = true
-            val card: Card? = myCards.getRandom()
-            card?.let { adapter.removeElement(it) }
-            updateTime()
-        }
     }
 
     override fun showQuestionForYou(question: Question) {
@@ -409,7 +531,7 @@ class BotGameActivity : BaseActivity<BotGamePresenter>(), BotGameView {
     }
 
     fun setCard(view: View, card: Card) {
-        view.tv_card_person_name.text = card.abstractCard.name
+        view.tv_card_person_name.text = card.abstractCard.name?.let { AppHelper.cutLongDescription(it, MAX_LENGTH) }
 
         Glide.with(this)
                 .load(card.abstractCard.photoUrl)
@@ -427,12 +549,14 @@ class BotGameActivity : BaseActivity<BotGamePresenter>(), BotGameView {
 
     override fun showGameEnd(type: GamesRepository.GameEndType, card: Card) {
         timer.cancel()
+        disconnectTimer?.cancel()
 
         if (type == GamesRepository.GameEndType.DRAW) {
             MaterialDialog.Builder(this)
-                    .title(getString(R.string.draw))
+                    .title("Draw")
                     .titleGravity(GravityEnum.CENTER)
-                    .neutralText(getString(R.string.button_ok))
+//                    .content("draw")
+                    .neutralText("ok")
                     .buttonsGravity(GravityEnum.END)
                     .onNeutral { dialog, which ->
                         goToFindGameActivity()
@@ -454,7 +578,7 @@ class BotGameActivity : BaseActivity<BotGamePresenter>(), BotGameView {
                     .titleGravity(GravityEnum.CENTER)
                     .customView(R.layout.dialog_end_game, false)
 
-                    .neutralText(getString(R.string.button_ok))
+                    .neutralText("ok")
                     .buttonsGravity(GravityEnum.END)
                     .onNeutral { dialog, which ->
                         goToFindGameActivity()
@@ -490,6 +614,7 @@ class BotGameActivity : BaseActivity<BotGamePresenter>(), BotGameView {
     }
 
     private fun goToFindGameActivity() {
-        GameListActivity.start(this)
+        PersonalActivity.start(this)
     }
+
 }

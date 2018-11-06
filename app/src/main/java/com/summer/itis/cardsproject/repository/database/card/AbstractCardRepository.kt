@@ -46,4 +46,13 @@ class AbstractCardRepository(): ChildRelativeRepository<AbstractCard>() {
         return dataSnapshot.getValue(AbstractCard::class.java)
     }
 
+    fun findMyAbstractCards(userId: String): Single<List<AbstractCard>> {
+        val single: Single<List<AbstractCard>> = Single.create { e ->
+            findRelativeIds(userId, USERS_ABSTRACT_CARDS).subscribe { ids ->
+                findEntitiesByIds(ids).subscribe { cards -> e.onSuccess(cards) }
+            }
+        }
+        return single.compose(RxUtils.asyncSingle())
+    }
+
 }

@@ -37,6 +37,10 @@ class LoginActivity : BaseActivity<LoginPresenter>(), LoginView, View.OnClickLis
         checkUserSession()
     }
 
+    override fun setStartStatus() {
+
+    }
+
     private fun checkUserSession() {
         val sharedPreferences: SharedPreferences = getSharedPreferences(USER_DATA_PREFERENCES,Context.MODE_PRIVATE)
         if(sharedPreferences.contains(USER_USERNAME)) {

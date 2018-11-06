@@ -50,6 +50,28 @@
             android:screenOrientation="portrait"
             android:configChanges="orientation|keyboardHidden"
             />
+
+        <activity android:name="com.summer.itis.cardsproject.ui.game.play.user_play.PlayGameActivity"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"
+            />
+
+        <activity android:name=".ui.game.add_game.AddGameActivity"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"
+            />
+        <activity android:name=".ui.game.add_photo.AddPhotoActivity"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"
+            />
+
+        <activity android:name=".ui.game.game_list.game.GameListActivity"
+            android:windowSoftInputMode="stateAlwaysHidden"
+            android:screenOrientation="portrait"
+            android:configChanges="orientation|keyboardHidden"
+            />
     </application>
 
 </manifest>

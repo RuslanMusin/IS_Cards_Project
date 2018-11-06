@@ -14,6 +14,7 @@ import com.summer.itis.cardsproject.ui.member.member_item.PersonalPresenter
 import com.summer.itis.cardsproject.R
 import com.summer.itis.cardsproject.model.user.User
 import com.summer.itis.cardsproject.utils.AppHelper
+import com.summer.itis.cardsproject.utils.Const.ONLINE_STATUS
 import com.summer.itis.cardsproject.utils.Const.OWNER_TYPE
 import com.summer.itis.cardsproject.utils.Const.USER_KEY
 import com.summer.itis.cardsproject.utils.Const.gsonConverter
@@ -49,6 +50,10 @@ class PersonalActivity : NavigationBaseActivity<PersonalPresenter>(), PersonalVi
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK).addFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK)
             context.startActivity(intent)
         }
+    }
+
+    override fun setStartStatus() {
+        setStartWaiting(ONLINE_STATUS)
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

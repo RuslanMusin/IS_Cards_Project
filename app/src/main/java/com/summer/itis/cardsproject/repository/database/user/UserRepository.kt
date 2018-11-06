@@ -11,6 +11,8 @@ import com.summer.itis.cardsproject.repository.RepositoryProvider.Companion.USER
 import com.summer.itis.cardsproject.repository.RepositoryProvider.Companion.USER_FRIENDS
 import com.summer.itis.cardsproject.repository.database.base.RelationalRepository
 import com.summer.itis.cardsproject.utils.AppHelper
+import com.summer.itis.cardsproject.utils.Const.OFFLINE_STATUS
+import com.summer.itis.cardsproject.utils.Const.ONLINE_STATUS
 import com.summer.itis.cardsproject.utils.Const.SEP
 import com.summer.itis.cardsproject.utils.Const.TAG_LOG
 import com.summer.itis.cardsproject.utils.RxUtils
@@ -63,6 +65,71 @@ class UserRepository: RelationalRepository<User>() {
 
     override fun getValueFromSnapshot(dataSnapshot: DataSnapshot): User? {
         return dataSnapshot.getValue(User::class.java)
+    }
+
+    fun changeJustUserStatus(status: String): Single<Boolean> {
+        Log.d(TAG_LOG,"chageJustUserStatus = $status")
+        val single: Single<Boolean> = Single.create{e ->
+            if(AppHelper.userInSession) {
+                AppHelper.currentUser.let { user ->
+                    user.status = status
+                    databaseReference.child(user.id).child(FIELD_STATUS).setValue(user.status)
+                    user.lobbyId?.let {
+                        databaseReference.root.child(LOBBIES).child(it).child(FIELD_STATUS).setValue(user.status)
+                    }
+                    e.onSuccess(true)
+                }
+            }
+        }
+        return single.compose(RxUtils.asyncSingle())
+    }
+
+    fun checkUserStatus(userId: String): Single<Boolean> {
+        val single: Single<Boolean> = Single.create{e ->
+            findById(userId).subscribe{user ->
+                if(user.status.equals(ONLINE_STATUS)) {
+                    e.onSuccess(true)
+                } else {
+                    e.onSuccess(false)
+                }
+            }
+        }
+        return single.compose(RxUtils.asyncSingle())
+    }
+
+    fun checkUserConnection(checkIt: () -> (Unit)) {
+        if(AppHelper.userInSession) {
+            AppHelper.currentUser.let {
+                if(it.status.equals(OFFLINE_STATUS)) {
+                    checkIt()
+                }
+                val myConnect = databaseReference.root.child(TABLE_NAME).child(it.id).child(FIELD_STATUS)
+                myConnect.addValueEventListener(object : ValueEventListener {
+                    override fun onCancelled(p0: DatabaseError) {
+                    }
+
+                    override fun onDataChange(snapshot: DataSnapshot) {
+                        if (OFFLINE_STATUS.equals(snapshot.value) || it.status.equals(OFFLINE_STATUS)) {
+                            Log.d(TAG_LOG, "my disconnect")
+                            checkIt()
+                        }
+
+                    }
+
+                })
+                myConnect.onDisconnect().setValue(OFFLINE_STATUS)
+            }
+        }
+    }
+
+    fun setOnOfflineStatus() {
+        if(AppHelper.userInSession) {
+            AppHelper.currentUser.let {
+                val myConnect = databaseReference.root.child(TABLE_NAME).child(it.id).child(FIELD_STATUS)
+                myConnect.onDisconnect().setValue(OFFLINE_STATUS)
+
+            }
+        }
     }
 
 }
